@@ -44,6 +44,7 @@
 
 #define DEFAULT_UPDATE_INTERVAL 5
 #define DEFAULT_LOW_LEVEL       20
+#define DEFAULT_FULL_LEVEL      100
 #define DEFAULT_CRITICAL_LEVEL  5
 
 #define STR_LTH 256
@@ -72,6 +73,7 @@ struct configuration {
     gint     update_interval;
     gint     icon_type;
     gint     low_level;
+    gint     full_level;
     gint     critical_level;
     gchar   *command_low_level;
     gchar   *command_critical_level;
@@ -87,6 +89,7 @@ struct configuration {
     DEFAULT_UPDATE_INTERVAL,
     UNKNOWN_ICON,
     DEFAULT_LOW_LEVEL,
+    DEFAULT_FULL_LEVEL,
     DEFAULT_CRITICAL_LEVEL,
     NULL,
     NULL,
@@ -174,6 +177,7 @@ static gint get_options (int argc, char **argv)
         { "icon-type"             , 'i', 0, G_OPTION_ARG_STRING, &icon_type_string                    , N_("Set icon type ('standard', 'notification' or 'symbolic')") , NULL },
         { "low-level"             , 'l', 0, G_OPTION_ARG_INT   , &configuration.low_level             , N_("Set low battery level (in percent)")                       , NULL },
         { "critical-level"        , 'r', 0, G_OPTION_ARG_INT   , &configuration.critical_level        , N_("Set critical battery level (in percent)")                  , NULL },
+        { "full-level"            , 'f', 0, G_OPTION_ARG_INT   , &configuration.full_level            , N_("Set full battery level (in percent)")                      , NULL },
         { "command-low-level"     , 'o', 0, G_OPTION_ARG_STRING, &configuration.command_low_level     , N_("Command to execute when low battery level is reached")     , NULL },
         { "command-critical-level", 'c', 0, G_OPTION_ARG_STRING, &configuration.command_critical_level, N_("Command to execute when critical battery level is reached"), NULL },
         { "command-left-click"    , 'x', 0, G_OPTION_ARG_STRING, &configuration.command_left_click    , N_("Command to execute when left clicking on tray icon")       , NULL },
@@ -587,6 +591,9 @@ static gboolean get_battery_full_capacity (gboolean *use_charge, gdouble *capaci
         *use_charge = TRUE;
     }
 
+    if(configuration.full_level != 100) {
+        *capacity *= fmin(1.0, (double)configuration.full_level / 100.0);
+    }
     return sysattr_status;
 }
 
